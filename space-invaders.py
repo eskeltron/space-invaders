@@ -67,9 +67,11 @@ font_menu.set_bold(True)
 exit_rendered             = font_menu.render('EXIT', False, red)
 resume_rendered           = font_menu.render('RESUME', False, white)
 dead_rendered             = font_menu.render('Stupid aliens', False, red)
-exit_pos       = [int(screen_size[0] * 0.5 - exit_rendered.get_width() / 2), int(screen_size[1] * 0.7 - 25)]
-resume_pos     = [int(screen_size[0] * 0.5 - resume_rendered.get_width() / 2), int(screen_size[1] * 0.3 - 25)]
-dead_pos       = [int(screen_size[0] * 0.5 - dead_rendered.get_width() / 2), int(screen_size[1] * 0.3 - 25)]
+win_rendered             = font_menu.render('YOU ARE THE BEST', False, green)
+exit_pos       = [int(screen_size[0] * 0.5 - exit_rendered.get_width() / 2)     , int(screen_size[1] * 0.7 - 25)]
+resume_pos     = [int(screen_size[0] * 0.5 - resume_rendered.get_width() / 2)   , int(screen_size[1] * 0.3 - 25)]
+dead_pos       = [int(screen_size[0] * 0.5 - dead_rendered.get_width() / 2)     , int(screen_size[1] * 0.3 - 25)]
+win_pos        = [int(screen_size[0] * 0.5 - win_rendered.get_width() / 2)      , int(screen_size[1] * 0.3 - 25)]
 
 class MOVE_ENEMY(enum.Enum):
 
@@ -308,6 +310,26 @@ class SpaceInvaders():
             pygame.display.flip()
             clock.tick(60)
 
+    def view_menu_win(self):
+        waiting = True
+        while waiting:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    pos_mouse = pygame.mouse.get_pos()
+                    if exit_rendered.get_rect(topleft=exit_pos).collidepoint(pos_mouse):
+                        waiting = False
+                        
+            screen.fill(black)
+
+            screen.blit(exit_rendered, exit_pos)
+            screen.blit(win_rendered , win_pos)
+
+            pygame.display.flip()
+            clock.tick(60)
+
     def start_game(self):
         self._initialize_enemies_positions()
         game_finished = False
@@ -345,7 +367,8 @@ class SpaceInvaders():
 
             if player_beaten > 0:
                 self.player.beaten(player_beaten)
-                if self.player.life <= 0:
+
+            if self.player.life <= 0 or len(self.total_enemies) <= 0:
                     game_finished = True
 
             screen.fill(black)
@@ -374,6 +397,8 @@ class SpaceInvaders():
         pygame.time.set_timer(pygame.USEREVENT+1, 0)
         if self.player.life <= 0:
             self.view_menu_dead()
+        elif len(self.total_enemies) <= 0:
+            self.view_menu_win()
 
 game = SpaceInvaders()
 
